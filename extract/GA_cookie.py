@@ -17,7 +17,7 @@ class ga_connect:
         self.viewId = viewId
 
         
-    def request(self, dates, metrics, dimetions, filters = []):    
+    def request(self, dates, metrics, dimetions, filters = [],page = 0):    
     # Забираем сырые данные
         return ga_connect.analytics.reports().batchGet(
                     body={
@@ -27,6 +27,7 @@ class ga_connect:
                         'dateRanges': [dates], 
                         'metrics': [metrics],
                         'dimensions': [dimetions],
+                        'pageToken': str(page),
                         'pageSize': '10000',
                         'dimensionFilterClauses': [filters]
                         }]
@@ -38,10 +39,16 @@ class ga_connect:
         columnHeader = report['reports'][0]['columnHeader']
         columns = columnHeader['dimensions'] + [i['name'] for i in columnHeader['metricHeader']['metricHeaderEntries']]
         data = report['reports'][0]['data']['rows']
+        report_lenth = report['reports'][0]['data']['rowCount']
+        while report_lenth > 10000:
+            report_extra = i_cap_GA_old.request(dates, metrics, dimetions, filters = [], page = 10000)
+            data += report_extra['reports'][0]['data']['rows']
+            report_lenth -= 10000
         data_table = [i['dimensions'] + i['metrics'][0]['values'] for i in data]           
         return pandas.DataFrame(data_table, columns = columns)
 def df_proc(frame):
     frame['ga_date']  = frame['ga_date'].apply(lambda x : pandas.Timestamp(datetime.datetime.strptime(x,'%Y%m%d')))
+    
     return frame
 
 
