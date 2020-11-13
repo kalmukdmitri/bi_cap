@@ -59,8 +59,8 @@ def wf_amo_refresh():
         old_token,doc_lenth = get_old_token(docname)
         url = 'https://workface.amocrm.ru/oauth2/access_token'
         data = json.dumps({
-        "client_id": "f3c9786b-3c1b-4d89-92de-9a5fca1b1b09",
-        "client_secret": "IfPcbgAecKWDgh91YpmnAWmhgW2oXv49bqhbolb9OTuNl2ew30LrrzfSu94f77iw",
+        "client_id": "0b56e5b1-36dc-49a4-ab2a-b48e71d72e33",
+        "client_secret": "3l6fmakaTUDFpLBEbtT88AHT5BMenzuiDUbKjZOl4ZGnrsvUTKvqCoEapBIlsSGi",
         "grant_type": "refresh_token",
         'redirect_uri':"https://workface.amocrm.ru/",
         "refresh_token": old_token['refresh_token']
