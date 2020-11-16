@@ -41,7 +41,7 @@ class ga_connect:
         data = report['reports'][0]['data']['rows']
         report_lenth = report['reports'][0]['data']['rowCount']
         while report_lenth > 10000:
-            report_extra = ga_connect.request(dates, metrics, dimetions, filters = [], page = 10000)
+            report_extra = ga_connect.request(self, dates, metrics, dimetions, filters = [], page = 10000)
             data += report_extra['reports'][0]['data']['rows']
             report_lenth -= 10000
         data_table = [i['dimensions'] + i['metrics'][0]['values'] for i in data]           
