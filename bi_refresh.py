@@ -122,6 +122,7 @@ log_table = [["Дата выполнения",str(datetime.datetime.today())[:19
 for i in modules:
     log_file = open_system_refresher(i)
     log+= log_file[0]
+    print(log_file[0])
     log_table.append(log_file[1])
 
 # Importing func to Transform and refresh data    
@@ -182,6 +183,7 @@ def closed_system_refresher(modul):
 for i in closed_modules:
     log_file_с = closed_system_refresher(i)
     log+= log_file_с[0]
+    print(log_file[0])
     log_table.append(log_file_с[1])
     
 log += f"\nВыполнение всех скриптов завершено за {datetime.datetime.today() - timer_bi }\n"
