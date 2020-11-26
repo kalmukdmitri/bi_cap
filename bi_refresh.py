@@ -133,6 +133,7 @@ from report.refresh_reports import bi_report_refresh
 from report.personal_reports import refresh_personal_reports
 from extract.wf_amo import wf_amo_refresh
 from transform_mix.wf_cookies import refresh_wf_ga_tables
+from report.call_hole import call_hole
 
 # Creating list on functions to execute table transformation and log their result or errors
 
@@ -160,6 +161,10 @@ closed_modules = [
     {
         'name' : 'Таблицы shop i-cap cookie',
         'func' : shop_icap_tables
+    },
+    {
+        'name' : 'Чат Амо',
+        'func' : call_hole
     }
 ]
 
