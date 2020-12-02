@@ -9,11 +9,11 @@ import time
 from googleapiclient.discovery import build
 from oauth2client.service_account import ServiceAccountCredentials
 from doc_token import get_tokens
-passwords = get_tokens()
+
 
 class callibri():
     base = 'https://api.callibri.ru/'
-    def __init__(self, token = passwords['callibri'], 
+    def __init__(self, token, 
                 user_email = 'user_email=kalmukdmitri@gmail.com',
                  site_id = 'site_id=37222'):
         self.token = token
@@ -28,17 +28,7 @@ class callibri():
         results = json.loads(answer.text)
         return results
     
-callibri_connect = callibri()
-date2 = datetime.datetime.today().date()  - datetime.timedelta(days=1)
-date1  = date2 - datetime.timedelta(days=5)
-callibri_data = callibri_connect.get_stats(date1, date2)
-cal_ph = {i['phone']:(i['date'][:10]+' '+i['date'][11:19]) for i in callibri_data['channels_statistics'][0]['calls']}
 
-SCOPES = ['https://www.googleapis.com/auth/drive',
-        'https://www.googleapis.com/auth/documents']
-
-credentials = ServiceAccountCredentials.from_json_keyfile_name('kalmuktech-5b35a5c2c8ec.json', SCOPES)
-service = build('docs', 'v1', credentials=credentials)
 
 def get_old_token(docname):
     """Intup: None
@@ -123,7 +113,20 @@ class get_AMO:
             if c == 100 or len_res < 500: 
                 i = False
         return res
-def call_hole:
+def call_hole():
+    passwords = get_tokens()
+    callibri_connect = callibri(token= passwords['callibri'])
+    date2 = datetime.datetime.today().date()  - datetime.timedelta(days=1)
+    date1  = date2 - datetime.timedelta(days=5)
+    callibri_data = callibri_connect.get_stats(date1, date2)
+    cal_ph = {i['phone']:(i['date'][:10]+' '+i['date'][11:19]) for i in callibri_data['channels_statistics'][0]['calls']}
+
+    SCOPES = ['https://www.googleapis.com/auth/drive',
+            'https://www.googleapis.com/auth/documents']
+
+    credentials = ServiceAccountCredentials.from_json_keyfile_name('kalmuktech-5b35a5c2c8ec.json', SCOPES)
+    service = build('docs', 'v1', credentials=credentials)
+
     current_token = get_new_token("1V1gX11RDYJf4ZVFCEOqp-kY5j6weApl_oEFkv2oZzW4")
     amo_connect = get_AMO(current_token['access_token'])
     r_dt = datetime.datetime.today()
@@ -133,6 +136,7 @@ def call_hole:
     date1_s = str(int(date1.total_seconds()))
     date2_s = str(int(date2.total_seconds()))
     fresj_cnts = amo_connect.get_big_amo('contacts')
+
     import string
     def get_custom_phone(cstms , fld = 'Телефон'):
         for i in cstms:
