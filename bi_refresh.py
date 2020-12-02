@@ -134,6 +134,7 @@ from report.personal_reports import refresh_personal_reports
 from extract.wf_amo import wf_amo_refresh
 from transform_mix.wf_cookies import refresh_wf_ga_tables
 from report.call_hole import call_hole
+from report.wf_reg_bot import wf_reg_bot
 
 # Creating list on functions to execute table transformation and log their result or errors
 
@@ -165,6 +166,10 @@ closed_modules = [
     {
         'name' : 'Чат Амо',
         'func' : call_hole
+    },
+    {
+        'name' : 'Чатбот Регистраций',
+        'func' : wf_reg_bot
     }
 ]
 

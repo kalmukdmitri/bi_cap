@@ -9,7 +9,11 @@ import time
 from googleapiclient.discovery import build
 from oauth2client.service_account import ServiceAccountCredentials
 from doc_token import get_tokens
+SCOPES = ['https://www.googleapis.com/auth/drive',
+        'https://www.googleapis.com/auth/documents']
 
+credentials = ServiceAccountCredentials.from_json_keyfile_name('kalmuktech-5b35a5c2c8ec.json', SCOPES)
+service = build('docs', 'v1', credentials=credentials)
 
 class callibri():
     base = 'https://api.callibri.ru/'
