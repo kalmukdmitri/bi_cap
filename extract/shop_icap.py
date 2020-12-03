@@ -12,6 +12,7 @@ import mysql.connector as mysql
 
 from doc_token import get_tokens
 
+
 class ga_connect:
     #   Задаём ключ из файла
     credentials = service_account.Credentials.from_service_account_file('kalmuktech-5b35a5c2c8ec.json',)
@@ -49,6 +50,19 @@ def df_proc(frame):
     frame['ga_date']  = frame['ga_date'].apply(lambda x : pandas.Timestamp(datetime.datetime.strptime(x,'%Y%m%d')))
     return frame
 
+def dedublicate_table(df):
+    dict_of_dims_date = {}
+    for i in df.itertuples():
+        ids = i.ga_dimension1
+        if ids in dict_of_dims_date:
+            if  dict_of_dims_date[ids].ga_date < i.ga_date:
+                continue
+        else:
+            dict_of_dims_date[ids] = i
+    
+    return pandas.DataFrame(dict_of_dims_date.values())
+
+
 
 def shop_icap_tables():
     log = ""
@@ -69,7 +83,7 @@ def shop_icap_tables():
     i_cap_DF_GA.columns = columns
     i_cap_DF_GA = df_proc(i_cap_DF_GA)
     df_cooks = i_cap_DF_GA.drop(columns = ['ga_sessions'])
-
+    df_cooks = dedublicate_table(df_cooks)
     params = { 'dimetions': [{'name': 'ga:dimension2'},
                                 {'name': 'ga:date'},
                                 {'name': 'ga:fullReferrer'},

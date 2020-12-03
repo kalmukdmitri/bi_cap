@@ -346,15 +346,12 @@ def wf_amo_refresh():
     created_at, pipeline_name, status 
     FROM `kalmuktech.wf_bi.AMO_contacts` as cnt
     join `kalmuktech.wf_bi.AMO_leads` as lds on lds.contact_id = cnt.conts_id),
-
      db as (
     SELECT users.phone as u_phone, deals, oborot, 
     users.email as u_email, date, if(about>'',1,0) as cmp_info, 
     name, ifnull(is_paid, 0) as paid FROM `kalmuktech.wf_bi.wf_users` as users
     left join `kalmuktech.wf_bi.wf_compaies` as cmp on cmp.user_id = users.user_id
     left join `kalmuktech.wf_bi.wf_deals`  as deals on deals.phone = users.phone)
-
-
     select * from amo
     full join db on db.u_phone = amo.phone
     """
