@@ -267,8 +267,6 @@ def proccess_unsort(unsl, pipeline):
         email
     ]
 
-proccess_unsort(unsort[1],pips)
-
 unsort=amo_connect.get_big_amo("incoming_leads")
 unsort_leads_processed = [(proccess_unsort(i,pips)) for i in unsort]
 unsort_leads_processed_df = pd.DataFrame(unsort_leads_processed,
