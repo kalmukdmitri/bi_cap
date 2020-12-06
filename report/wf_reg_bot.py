@@ -1,7 +1,7 @@
 import datetime
 import mysql.connector as mysql
 import pandas as pd
-import telebot
+import requests
 def query_df(qry):
     devDB  = {
         'host' :"185.180.163.10",
@@ -56,7 +56,9 @@ def wf_reg_bot():
         for i in nul_phones:
             mess+= i+'\n'
     chats = [247391252, 482876050]
-    bot = telebot.TeleBot("1416074989:AAECtHYON681siUb5S1bzuMHKnLUI-qnb9M")
+    token = "1416074989:AAECtHYON681siUb5S1bzuMHKnLUI-qnb9M"
+    method = "sendMessage"
+    url = f"https://api.telegram.org/bot{token}/{method}"
     for i in chats:
-        print(i)
-        bot.send_message(i, mess)
+        data = {"chat_id": i, "text": mess}
+        requests.post(url, data=data)

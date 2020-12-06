@@ -115,7 +115,6 @@ def open_system_refresher(modul):
     return systems_log,datalog
 
 log  = f"""\n Выполнение скрипта обновления BI {str(datetime.datetime.today())[:19]} Началось
-
 """
 log_table = [["Дата выполнения",str(datetime.datetime.today())[:19]]]
 

@@ -4,7 +4,6 @@ import requests
 import datetime
 import pandas
 from pandas import DataFrame as df
-from pd_gbq import *
 import time 
 from googleapiclient.discovery import build
 from oauth2client.service_account import ServiceAccountCredentials
@@ -21,6 +20,7 @@ class callibri():
                 user_email = 'user_email=kalmukdmitri@gmail.com',
                  site_id = 'site_id=37222'):
         self.token = token
+
         self.user_email = user_email
         self.site_id= site_id
     def get_stats(self, date1,date2):
@@ -176,7 +176,9 @@ def call_hole():
     else:
         message = 'Нет пропавших контактов'
     chats = [247391252,482876050]
-    bot = telebot.TeleBot("1461276547:AAECMSMOMW1Zah3IEXeAyGAsBVJD0ktM86E")
+    token = "1461276547:AAECMSMOMW1Zah3IEXeAyGAsBVJD0ktM86E"
+    method = "sendMessage"
+    url = f"https://api.telegram.org/bot{token}/{method}"
     for i in chats:
-        print(i)
-        bot.send_message(i, message)
+        data = {"chat_id": i, "text": message}
+        requests.post(url, data=data)
