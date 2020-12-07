@@ -11,40 +11,41 @@ from oauth2client.service_account import ServiceAccountCredentials
 def bi_report_refresh():
     log = ""
     
-    query = """
+    quer = """
     SELECT
-      utm_source,
-      utm_campaign,
-      utm_term,
-      DATE(date) AS date,
-      COUNT(conts_id) AS all_leads,
-      COUNTIF(status = 'Мусор') AS failed,
-      COUNTIF(status != 'Мусор') AS normal,
-      SUM(CASE
-          WHEN status = 'Успешно реализовано' THEN sale
-        ELSE
-        0
-      END
-        ) AS sold,
-      SUM(CASE
-          WHEN status != 'Успешно реализовано' AND status != 'Мусор' AND status != 'Закрыто и не реализовано' THEN sale
-        ELSE
-        0
-      END
-        ) AS insale,
-      ifnull(SUM(sum),
-        0) AS sum
+      DISTINCT(lead_id),
+      ga_source,
+      ga_campaign,
+      ga_keyword,
+      date,
+      status,
+      sale
     FROM (
       SELECT
-        conts_id AS conts_id,
-        phone,
+        DISTINCT(id) AS lead_id,
+        ga_source,
+        ga_campaign,
+        ga_keyword,
+        ga_date AS date,
         status,
+        sale
+      FROM
+        kalmuktech.marketing_bi.base_tilda_forms AS tilda
+      JOIN
+        `kalmuktech.marketing_bi.base_ga_cookie` AS ga
+      ON
+        tilda.cookie = ga.ga_dimension1
+      WHERE
+        ga_date <=date
+      UNION ALL
+      SELECT
+        DISTINCT(lead_id),
         utm_source,
         utm_campaign,
         utm_term,
         date,
-        sale,
-        sum
+        status,
+        sale
       FROM (
         SELECT
           DISTINCT (conts_id) AS conts_id,
@@ -54,12 +55,16 @@ def bi_report_refresh():
           utm_campaign,
           utm_term,
           date,
+          lead_dt,
+          lead_id,
           sale
         FROM (
           SELECT
             conts_id,
             status,
             sale,
+            lead_id,
+            AMO_leads.datetime_creat AS lead_dt,
             phone AS ml
           FROM
             kalmuktech.marketing_bi.base_amo_leads AS AMO_leads
@@ -105,50 +110,25 @@ def bi_report_refresh():
         GROUP BY
           phone) AS ms_sold
       ON
-        ms_sold.phone_ms = tbl.phone )
-    GROUP BY
-      1,
-      2,
-      3,
-      4
-    UNION ALL
-    SELECT
-      utm_source,
-      utm_campaign,
-      utm_term,
-      DATE(date) AS date,
-      COUNT(conts_id) AS all_leads,
-      COUNTIF(status = 'Мусор') AS failed,
-      COUNTIF(status != 'Мусор') AS normal,
-      SUM(CASE
-          WHEN status = 'Успешно реализовано' THEN sale
-        ELSE
-        0
-      END
-        ) AS sold,
-      SUM(CASE
-          WHEN status != 'Успешно реализовано' AND status != 'Мусор' AND status != 'Закрыто и не реализовано' THEN sale
-        ELSE
-        0
-      END
-        ) AS insale,
-      0 AS sum
-    FROM (
+        ms_sold.phone_ms = tbl.phone
+      WHERE
+        date <=lead_dt
+      UNION ALL
       SELECT
-        DISTINCT (conts_id),
-        email,
-        status,
+        DISTINCT(lead_id),
         utm_source,
         utm_campaign,
         utm_term,
-        
         date,
+        status,
         sale
       FROM (
         SELECT
           conts_id,
+          lead_id,
           status,
           sale,
+          AMO_leads.datetime_creat AS lead_dt,
           email AS ml
         FROM
           kalmuktech.marketing_bi.base_amo_leads AS AMO_leads
@@ -185,148 +165,101 @@ def bi_report_refresh():
           4,
           5) AS colibr_mail
       ON
-        colibr_mail.email = lead_st.ml)
-    GROUP BY
-      1,
-      2,
-      3,
-      4
-      
-    UNION ALL
-    
-    SELECT
-      ga_source,
-      ga_campaign,
-      ga_keyword,
-      DATE(ga_date) AS date,
-      COUNT(id) AS all_leads,
-      COUNTIF(status = 'Мусор') AS failed,
-      COUNTIF(status != 'Мусор') AS normal,
-      SUM(CASE
-          WHEN status = 'Успешно реализовано' THEN sale
-        ELSE
-        0
-      END
-        ) AS sold,
-      SUM(CASE
-          WHEN status != 'Успешно реализовано' AND status != 'Мусор' AND status != 'Закрыто и не реализовано' THEN sale
-        ELSE
-        0
-      END
-        ) AS insale,
-      0 AS sum
-    FROM
-      kalmuktech.marketing_bi.base_tilda_forms AS tilda
-    JOIN
-      `kalmuktech.marketing_bi.base_ga_cookie` AS ga
-    ON
-      tilda.cookie = ga.ga_dimension1
-    GROUP BY
-      1,
-      2,
-      3,
-      4
-
-    UNION ALL
-
-    SELECT
-      ga_source,
-      ga_campaign,
-      ga_keyword,
-      DATE(ga_date) AS date,
-      COUNT(cont_id) AS all_leads,
-      COUNTIF(status = 'Мусор') AS failed,
-      COUNTIF(status != 'Мусор') AS normal,
-      SUM(CASE
-          WHEN status = 'Успешно реализовано' THEN sale
-        ELSE
-        0
-      END
-        ) AS sold,
-      SUM(CASE
-          WHEN status != 'Успешно реализовано' AND status != 'Мусор' AND status != 'Закрыто и не реализовано' THEN sale
-        ELSE
-        0
-      END
-        ) AS insale,
-      0 AS sum
-    FROM
-      `kalmuktech.marketing_bi.chats_data` AS chat
-    JOIN
-      `kalmuktech.marketing_bi.base_ga_cookie` AS ga
-    ON
-      chat.ym_cookie = ga.ga_dimension1
-    LEFT JOIN
-      `kalmuktech.marketing_bi.base_amo_leads` AS leads
-    ON
-      leads.contact_id = chat.cont_id
-    GROUP BY
-      1,
-      2,
-      3,
-      4
-     
-    UNION ALL
-    SELECT
-      ga_source AS utm_source,
-      ga_campaign AS utm_campaign,
-      ga_keyword AS utm_term,
-      DATE( ga.ga_date ) AS date,
-      COUNT(conts_id) AS all_leads,
-      COUNTIF(status = 'Мусор') AS failed,
-      COUNTIF(status != 'Мусор') AS normal,
-      SUM(CASE
-          WHEN status = 'Успешно реализовано' THEN sale
-        ELSE
-        0
-      END
-        ) AS sold,
-      SUM(CASE
-          WHEN status != 'Успешно реализовано' AND status != 'Мусор' AND status != 'Закрыто и не реализовано' THEN sale
-        ELSE
-        0
-      END
-        ) AS insale,
-      0 AS sum
-    FROM
-      kalmuktech.marketing_bi.base_amo_contacts AS c
-    JOIN
-      kalmuktech.marketing_bi.base_amo_leads AS l
-    ON
-      l.contact_id = c.conts_id
-    INNER JOIN
-      `kalmuktech.marketing_bi.wf_buyers_icap` AS w
-    ON
-      w.phone = c.phone
-    LEFT JOIN
-      `kalmuktech.wf_bi.users_id` AS wf_u
-    ON
-      wf_u.user_id = w.user_id
-    INNER JOIN
-      kalmuktech.marketing_bi.shp_icap_wf_cooks AS wc
-    ON
-      wc.ga_dimension1 = wf_u.u_id
-    JOIN
-      `kalmuktech.marketing_bi.base_ga_cookie` AS ga
-    ON
-      wc.ga_dimension2 = ga.ga_dimension1
-    GROUP BY
-      1,
-      2,
-      3,
-      4
+        colibr_mail.email = lead_st.ml
+      WHERE
+        date <=lead_dt
+      UNION ALL
+      SELECT
+        DISTINCT(lead_id) AS lead_id,
+        ga_source,
+        ga_campaign,
+        ga_keyword,
+        ga_date AS date,
+        status,
+        sale
+      FROM
+        `kalmuktech.marketing_bi.chats_data` AS chat
+      JOIN
+        `kalmuktech.marketing_bi.base_ga_cookie` AS ga
+      ON
+        chat.ym_cookie = ga.ga_dimension1
+      LEFT JOIN
+        `kalmuktech.marketing_bi.base_amo_leads` AS leads
+      ON
+        leads.contact_id = chat.cont_id
+      WHERE
+        ga.ga_date <= leads.datetime_creat
+      UNION ALL
+      SELECT
+        DISTINCT lead_id,
+        ga_source AS utm_source,
+        ga_campaign AS utm_campaign,
+        ga_keyword AS utm_term,
+        ga.ga_date AS date,
+        status,
+        sale
+      FROM
+        kalmuktech.marketing_bi.base_amo_contacts AS c
+      JOIN
+        kalmuktech.marketing_bi.base_amo_leads AS l
+      ON
+        l.contact_id = c.conts_id
+      INNER JOIN
+        `kalmuktech.marketing_bi.wf_buyers_icap` AS w
+      ON
+        w.phone = c.phone
+      LEFT JOIN
+        `kalmuktech.wf_bi.users_id` AS wf_u
+      ON
+        wf_u.user_id = w.user_id
+      INNER JOIN
+        kalmuktech.marketing_bi.shp_icap_wf_cooks AS wc
+      ON
+        wc.ga_dimension1 = wf_u.u_id
+      JOIN
+        `kalmuktech.marketing_bi.base_ga_cookie` AS ga
+      ON
+        wc.ga_dimension2 = ga.ga_dimension1
+      WHERE
+        ga.ga_date <= l.datetime_creat)
     """
 
-    time.sleep(2)
-    callibri_table = gbq_pd('predifined_leads_data_cookie', 'marketing_bi')
-    time.sleep(2)
-    dates_str = callibri_table.df_query(query)
+    unique_leads = gbq_pd('unique_leads', 'marketing_bi')
+    new_clean_data = unique_leads.df_query(quer)
+    new_clean_data['link'] = new_clean_data['lead_id'].apply(lambda x:'https://officeicapru.amocrm.ru/leads/detail/'+str(x))
+    unique_leads.replace(new_clean_data)
+
+    report_create = '''SELECT
+      ga_source as utm_source,
+      ga_campaign as utm_campaign,
+      ga_keyword as utm_term,
+      date,
+      COUNT(lead_id) AS all_leads,
+      COUNTIF(status = 'Мусор') AS failed,
+      COUNTIF(status != 'Мусор') AS normal,
+      SUM(CASE
+          WHEN status = 'Успешно реализовано' THEN sale
+        ELSE
+        0
+      END
+        ) AS sold,
+      SUM(CASE
+          WHEN status != 'Успешно реализовано' AND status != 'Мусор' AND status != 'Закрыто и не реализовано' THEN sale
+        ELSE
+        0
+      END
+        ) AS insale
+    FROM  kalmuktech.marketing_bi.unique_leads GROUP BY
+      1,
+      2,
+      3,
+      4'''
+    predifined_leads_data = gbq_pd('predifined_leads_data_cookie', 'marketing_bi')
+    dates_str = predifined_leads_data.df_query(report_create)
 
     def transform_sourse(data):
         dict_of_dims_date = []
         for i in data.iterrows(): 
-            
-            
             if i[1][1] == '(not set)' and i[1][0] == 'google':
                 i[1][0] = 'Google СЕО Поиск'
             elif i[1][1] == '(not set)' and 'yandex' in i[1][0]:
@@ -334,11 +267,10 @@ def bi_report_refresh():
             elif i[1][0] == '(direct)':
                 i[1][0] ='Прямые'
             dict_of_dims_date.append(i[1])    
-        
+
         return pandas.DataFrame(dict_of_dims_date)
     dates_str = transform_sourse(dates_str)
-    callibri_table.replace(dates_str)
-    
+    predifined_leads_data.replace(dates_str)
     log += f"По таблице predifined_leads_data_cookie обновилось {len(dates_str)} строк \n"
 
     join_table_gains_query  = """
@@ -359,9 +291,7 @@ def bi_report_refresh():
       ifnull(insale,
         0) AS insale,
       ifnull(sold,
-        0) AS sold,
-      ifnull(sum,
-        0) AS sum
+        0) AS sold
     FROM (
       SELECT
         ym_ad_DirectOrder AS campaign_name,
@@ -385,8 +315,7 @@ def bi_report_refresh():
         SUM(all_leads) AS all_leads,
         SUM(normal) AS normal,
         SUM(insale) AS insale,
-        SUM(sold) AS sold,
-        SUM(sum) AS sum
+        SUM(sold) AS sold
       FROM
         `kalmuktech.marketing_bi.predifined_leads_data_cookie`
       WHERE
@@ -399,33 +328,28 @@ def bi_report_refresh():
       yandex_leads.utm_source = yandex_ads.source
       AND yandex_leads.utm_campaign = yandex_ads.capmapaign
       AND yandex_leads.dt =yandex_ads.date
-
-    
     UNION ALL
-
     SELECT
-    project AS project,
-    campaign_name AS camp,
-    cost,
-    click AS clicks,
-    date_start AS date,
-    'Facebook Ads' AS systems,
-    ifnull(fb.source,
+      project AS project,
+      campaign_name AS camp,
+      cost,
+      click AS clicks,
+      date_start AS date,
+      'Facebook Ads' AS systems,
+      ifnull(fb.source,
         'facebook') AS utm_source,
-    capmapaign AS utm_campaign,
-    'none' AS utm_term,
-    ifnull(all_leads,
+      capmapaign AS utm_campaign,
+      'none' AS utm_term,
+      ifnull(all_leads,
         0) AS all_leads,
-    ifnull(normal,
+      ifnull(normal,
         0) AS normal,
-    ifnull(insale,
+      ifnull(insale,
         0) AS insale,
-    ifnull(sold,
-        0) AS sold,
-            ifnull(sum,
-        0) AS sum
+      ifnull(sold,
+        0) AS sold
     FROM (
-    SELECT
+      SELECT
         project,
         campaign_name,
         campaign_id,
@@ -435,9 +359,9 @@ def bi_report_refresh():
         SUM(lead) AS lead,
         SUM(click) AS click,
         SUM(spend) AS cost,
-    FROM
+      FROM
         `kalmuktech.marketing_bi.FacebookAds` AS fb
-    GROUP BY
+      GROUP BY
         1,
         2,
         3,
@@ -445,126 +369,111 @@ def bi_report_refresh():
         5,
         6)AS fb
     LEFT OUTER JOIN
-    `kalmuktech.marketing_bi.predifined_leads_data_cookie` AS leads
+      `kalmuktech.marketing_bi.predifined_leads_data_cookie` AS leads
     ON
-    fb.source = leads.utm_source
-    AND fb.capmapaign = leads.utm_campaign
-    AND fb.date_start = leads.date
-    
+      fb.source = leads.utm_source
+      AND fb.capmapaign = leads.utm_campaign
+      AND fb.date_start = leads.date
     UNION ALL
     SELECT
-    "I-cap" AS project,
-    ga_campaign AS camp,
-    ga_adCost AS cost,
-    ga_adClicks AS clicks,
-    system.ga_date AS date,
-    'GoogleAds' AS systems,
-    'google' AS utm_source,
-    ga_adwordsCampaignID AS utm_campaign,
-    ga_keyword AS utm_term,
-    ifnull(all_leads,
+      "I-cap" AS project,
+      ga_campaign AS camp,
+      ga_adCost AS cost,
+      ga_adClicks AS clicks,
+      system.ga_date AS date,
+      'GoogleAds' AS systems,
+      'google' AS utm_source,
+      ga_adwordsCampaignID AS utm_campaign,
+      ga_keyword AS utm_term,
+      ifnull(all_leads,
         0) AS all_leads,
-    ifnull(normal,
+      ifnull(normal,
         0) AS normal,
-    ifnull(insale,
+      ifnull(insale,
         0) AS insale,
-    ifnull(sold,
-        0) AS sold,
-            ifnull(sum,
-        0) AS sum
+      ifnull(sold,
+        0) AS sold
     FROM
-    
-    `kalmuktech.marketing_bi.GoogleAds` AS system
+      `kalmuktech.marketing_bi.GoogleAds` AS system
     LEFT OUTER JOIN
-    `kalmuktech.marketing_bi.predifined_leads_data_cookie` AS leads
+      `kalmuktech.marketing_bi.predifined_leads_data_cookie` AS leads
     ON
-    leads.utm_source = 'google'
-    AND system.ga_adwordsCampaignID = leads.utm_campaign
-    AND system.ga_date = leads.date
-    AND system.ga_keyword = leads.utm_term
-    
+      leads.utm_source = 'google'
+      AND system.ga_adwordsCampaignID = leads.utm_campaign
+      AND system.ga_date = leads.date
+      AND system.ga_keyword = leads.utm_term
     UNION ALL
     SELECT
-    project AS project,
-    capmaign AS camp,
-    cost,
-    clicks AS clicks,
-    vk.date AS date,
-    'VK Реклама' AS systems,
-    'vk' AS utm_source,
-    umt_campaing AS utm_campaign,
-    'none' AS utm_term,
-    ifnull(all_leads,
+      project AS project,
+      capmaign AS camp,
+      cost,
+      clicks AS clicks,
+      vk.date AS date,
+      'VK Реклама' AS systems,
+      'vk' AS utm_source,
+      umt_campaing AS utm_campaign,
+      'none' AS utm_term,
+      ifnull(all_leads,
         0) AS all_leads,
-    ifnull(normal,
+      ifnull(normal,
         0) AS normal,
-    ifnull(insale,
+      ifnull(insale,
         0) AS insale,
-    ifnull(sold,
-        0) AS sold,
-            ifnull(sum,
-        0) AS sum
+      ifnull(sold,
+        0) AS sold
     FROM
-    kalmuktech.marketing_bi.VkAds AS vk
+      kalmuktech.marketing_bi.VkAds AS vk
     LEFT OUTER JOIN
-    `kalmuktech.marketing_bi.predifined_leads_data_cookie` AS leads
+      `kalmuktech.marketing_bi.predifined_leads_data_cookie` AS leads
     ON
-    'vk' = leads.utm_source
-    AND vk.umt_campaing = leads.utm_campaign
-    AND vk.date = leads.date
-    
-    UNION ALL  
-    
+      'vk' = leads.utm_source
+      AND vk.umt_campaing = leads.utm_campaign
+      AND vk.date = leads.date
+    UNION ALL
     SELECT
-    "I-cap" AS project,
-    'Органика i-cap' AS camp,
-    0,
-    0 AS clicks,
-    date AS date,
-    utm_source AS systems,
-    utm_source,
-    utm_campaign,
-    'none' AS utm_term,
-    ifnull(all_leads,
+      "I-cap" AS project,
+      'Органика i-cap' AS camp,
+      0,
+      0 AS clicks,
+      date AS date,
+      utm_source AS systems,
+      utm_source,
+      utm_campaign,
+      'none' AS utm_term,
+      ifnull(all_leads,
         0) AS all_leads,
-    ifnull(normal,
+      ifnull(normal,
         0) AS normal,
-    ifnull(insale,
+      ifnull(insale,
         0) AS insale,
-    ifnull(sold,
-        0) AS sold,
-            ifnull(sum,
-        0) AS sum
+      ifnull(sold,
+        0) AS sold
     FROM
-    `kalmuktech.marketing_bi.predifined_leads_data_cookie`
-    where utm_campaign = '(not set)'
-    
+      `kalmuktech.marketing_bi.predifined_leads_data_cookie`
+    WHERE
+      utm_campaign = '(not set)'
     UNION ALL
-    
-SELECT
-  "I-cap" AS project,
-  camp,
-  cost,
-  clicks,
-  date,
-  systems,
-  utm_source,
-  utm_campaign,
-  utm_term,
-  all_leads,
-  normal,
-  insale,
-  sold,
-  sum
-FROM
-  `kalmuktech.old_ads.old_data_report`
-    
-    UNION ALL
-    
     SELECT
-    "I-cap" AS project,
+      "I-cap" AS project,
+      camp,
+      cost,
+      clicks,
+      date,
+      systems,
+      utm_source,
+      utm_campaign,
+      utm_term,
+      all_leads,
+      normal,
+      insale,
+      sold
+    FROM
+      `kalmuktech.old_ads.old_data_report`
+    UNION ALL
+    SELECT
+      "I-cap" AS project,
       'Неопределено AMO i-cap' AS camp,
-      0 as cost,
+      0 AS cost,
       0 AS clicks,
       datetime_creat AS date,
       'Неопределено' AS systems,
@@ -584,8 +493,7 @@ FROM
         ELSE
         0
       END
-        ) AS insale,
-      0 AS sum  
+        ) AS insale
     FROM
       `kalmuktech.marketing_bi.base_amo_leads`
     WHERE
