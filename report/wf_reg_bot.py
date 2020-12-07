@@ -58,7 +58,8 @@ def wf_reg_bot():
     chats = [247391252, 482876050]
     token = "1416074989:AAECtHYON681siUb5S1bzuMHKnLUI-qnb9M"
     method = "sendMessage"
-    url = f"https://api.telegram.org/bot{token}/{method}"
+    
+    url = "https://api.telegram.org/bot{token}/{method}".format(token=token, method=method)
     for i in chats:
         data = {"chat_id": i, "text": mess}
         requests.post(url, data=data)
