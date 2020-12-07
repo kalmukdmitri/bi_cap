@@ -14,12 +14,12 @@ def bi_report_refresh():
     quer = """
     SELECT
       DISTINCT(lead_id),
-      ga_source,
-      ga_campaign,
-      ga_keyword,
-      date,
-      status,
-      sale
+      min(ga_source) as ga_source,
+      min(ga_campaign) as ga_campaign,
+      min(ga_keyword) as ga_keyword,
+      min(date) as date,
+      min(status) as status ,
+      max(sale) as sale
     FROM (
       SELECT
         DISTINCT(id) AS lead_id,
@@ -222,6 +222,7 @@ def bi_report_refresh():
         wc.ga_dimension2 = ga.ga_dimension1
       WHERE
         ga.ga_date <= l.datetime_creat)
+  group by 1
     """
 
     unique_leads = gbq_pd('unique_leads', 'marketing_bi')
