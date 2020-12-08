@@ -6,6 +6,7 @@ from google.oauth2 import service_account
 import datetime
 from pd_gbq import *
 
+# Основной модуль экспорта cookie
 
 class ga_connect:
     #   Задаём ключ из файла

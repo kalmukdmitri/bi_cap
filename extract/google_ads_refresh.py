@@ -7,6 +7,7 @@ from apiclient.discovery import build
 from google.cloud import bigquery
 from google.oauth2 import service_account
 
+# Модуль выгрузки данных из Google Ads
 class ga_connect:
     #   Задаём ключ из файла
     credentials = service_account.Credentials.from_service_account_file('kalmuktech-5b35a5c2c8ec.json',)

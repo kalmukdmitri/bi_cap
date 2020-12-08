@@ -6,7 +6,7 @@ import json
 import os
 from googleapiclient.discovery import build
 from oauth2client.service_account import ServiceAccountCredentials
-
+# Основной выполняемы файл ответственный за логирование и выполнение скриптов
 # Importing func to extract data
 
 from pd_gbq import gbq_pd

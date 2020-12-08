@@ -5,6 +5,7 @@ import json
 import datetime
 from pd_gbq import *
 
+# Данный модуль отвечает за выгрузку данных о расходах Яндекс Директ
 class direct_acc:
     client_id = 'a7be650488b1441f92b3e51f09de5132'
     

@@ -7,7 +7,7 @@ from oauth2client.service_account import ServiceAccountCredentials
 import mysql.connector as mysql
 from doc_token import get_tokens
 
-
+# Модуль генерации личных отчётов
 def query_df(qry, token):
     devDB  = token
     cnx = mysql.connect(**devDB)

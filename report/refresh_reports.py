@@ -7,7 +7,7 @@ import pandas
 import os
 from google.cloud import bigquery
 from oauth2client.service_account import ServiceAccountCredentials
-
+# Модуль предобработки и выгрузки данных для отчёта
 def bi_report_refresh():
     log = ""
     

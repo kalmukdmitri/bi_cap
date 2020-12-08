@@ -5,6 +5,7 @@ import json
 import datetime
 import time
 
+# Модуль выгрузки данных из ВК
 def get_vk(token = '', method = 'ads.getStatistics', params=''):
     user_id_V = "user_id=32785745&v=5.103"
     base_url = f"https://api.vk.com/method/{method}?{token}{user_id_V}&{params}"

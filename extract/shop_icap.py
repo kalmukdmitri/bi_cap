@@ -11,7 +11,7 @@ from oauth2client.service_account import ServiceAccountCredentials
 import mysql.connector as mysql
 
 from doc_token import get_tokens
-
+# Модуль грузит данные cookie из поддомена основного сайта
 
 class ga_connect:
     #   Задаём ключ из файла

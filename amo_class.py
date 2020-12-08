@@ -2,6 +2,8 @@ import requests
 import json
 from pandas import DataFrame as pd
 
+#Тестовый модуль интеграции Амо и стороннего сервиса 
+
 class get_AMO:
     def __init__(self, token,domain):
         self.domain = domain 

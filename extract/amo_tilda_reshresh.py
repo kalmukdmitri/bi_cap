@@ -10,6 +10,7 @@ from google.cloud import bigquery
 from googleapiclient.discovery import build
 from oauth2client.service_account import ServiceAccountCredentials
 
+# Выгружаемая функция по обновлению данных AMOCRM
 def Amo_refresh():
     
     log = ""
@@ -19,7 +20,7 @@ def Amo_refresh():
     credentials = ServiceAccountCredentials.from_json_keyfile_name('kalmuktech-5b35a5c2c8ec.json', SCOPES)
     service = build('docs', 'v1', credentials=credentials)
 
-
+#Функции по выгрзке и обновению токена АМО из Google Doc
 
     def get_old_token(docname):
         """Intup: None
@@ -50,7 +51,6 @@ def Amo_refresh():
         result = service.documents().batchUpdate(
             documentId=docname, body={'requests': requests}).execute()
 
-
     def get_new_token(docname):
         """Intup: None
         Process: write new token instead of old one
@@ -71,7 +71,6 @@ def Amo_refresh():
         write_new_token(docname,token,doc_lenth)
 
         return token
-
 
     class get_AMO:
         m_url = "https://officeicapru.amocrm.ru/api/v2/"
@@ -108,6 +107,7 @@ def Amo_refresh():
     amo_connect = get_AMO(current_token['access_token'])
     dicts_amo = amo_connect.get_data("account?with=pipelines,custom_fields,users")
 
+# Функция по получению воронок и статусов из АМО
     def pipiline_loc(pipelines):
         pipeline_dicts = {}
         for i in pipelines:
@@ -122,7 +122,7 @@ def Amo_refresh():
         return pipeline_dicts
 
     pips = pipiline_loc(dicts_amo['_embedded']['pipelines'])
-
+# Функция обработки лидов из Тильда
     def tilda_form_process(row_lead,pipeline):
         lead  = None
         if 'tags' in row_lead:
@@ -157,7 +157,7 @@ def Amo_refresh():
                     contacts
                 ]
         return lead
-
+# Функция обработки всех лидов
     def parse_amo_leads(lead, pipeline):
         leads = []
         pipeline_name = pipeline[str(lead['pipeline_id'])][0]
@@ -213,6 +213,7 @@ def Amo_refresh():
     leads_processed_gbq.replace(leads_processed_df)
 
     log += f"По таблице base_amo_leads обновилось {len(leads_processed_df)} строк \n"
+  
     def proccess_unsort(unsl, pipeline):
 
         uns_lead_date =  datetime.datetime.fromtimestamp(unsl['created_at']),
@@ -291,6 +292,7 @@ def Amo_refresh():
 
 
         return number
+    
     def parse_amo_contacts(conts):
         contacts = []
 
@@ -395,7 +397,7 @@ def Amo_refresh():
                                              'utm_medium',
                                              'utm_campaign',
                                              'utm_term'])
-
+# этот модуль обновлеяет данные в BigQuery
     chat_cnts_table = gbq_pd( 'chats_data', 'marketing_bi')
 
     chat_pd['cont_id'] = chat_pd['cont_id'].apply(lambda x: float(x))

@@ -6,6 +6,7 @@ import datetime
 from pd_gbq import *
 from extract.direct_refresh import direct_acc, dedouble_dict_table, get_match_table, match_dict,add_utm_to_df_yandex
 
+# Модуль выгрузки данных из доп. Рекламных Аккаунтов
 def wf_y_direct_refresh():
     from doc_token import get_tokens
     token = get_tokens()

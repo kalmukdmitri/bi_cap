@@ -11,6 +11,8 @@ from googleapiclient.discovery import build
 from oauth2client.service_account import ServiceAccountCredentials
 import mysql.connector as mysql
 
+# Модуль подгружает данные из системы дублирующей системы АМО для личных отчётов
+
 def wf_amo_refresh():
     
     log = ""

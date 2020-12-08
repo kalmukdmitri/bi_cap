@@ -8,6 +8,7 @@ from doc_token import get_tokens
 passwords = get_tokens()
 token = passwords['facebook']
 
+# Модуль выгрузки данных из Facebook Ads
 
 def fb_add_x(cell, fld):
     ld_click = 0

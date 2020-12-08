@@ -8,7 +8,7 @@ import time
 
 from doc_token import get_tokens
 passwords = get_tokens()
-
+# Данные модуль вгружает данные колтрекинга
 class callibri():
 
     base = 'https://api.callibri.ru/'
@@ -25,7 +25,7 @@ class callibri():
         answer = requests.get(request_url)
         results = json.loads(answer.text)
         return results
-    
+# Функция генерирует пары дат, для выгрузке данных их API коллтрекинга. Данные за период больше недели не грузятся
     
 def date_pairs(date1, date2):
     pairs= []

@@ -32,8 +32,6 @@ class callibri():
         results = json.loads(answer.text)
         return results
     
-
-
 def get_old_token(docname):
     """Intup: None
     Output: Old token"""
@@ -63,7 +61,6 @@ def write_new_token(docname, token, doc_lenth):
     result = service.documents().batchUpdate(
         documentId=docname, body={'requests': requests}).execute()
 
-
 def get_new_token(docname):
     """Intup: None
     Process: write new token instead of old one
@@ -84,7 +81,6 @@ def get_new_token(docname):
     write_new_token(docname,token,doc_lenth)
 
     return token
-
 
 class get_AMO:
     m_url = "https://officeicapru.amocrm.ru/api/v2/"
@@ -117,6 +113,7 @@ class get_AMO:
             if c == 100 or len_res < 500: 
                 i = False
         return res
+        
 def call_hole():
     passwords = get_tokens()
     callibri_connect = callibri(token= passwords['callibri'])
@@ -183,3 +180,4 @@ def call_hole():
     for i in chats:
         data = {"chat_id": i, "text": message}
         requests.post(url, data=data)
+call_hole()

@@ -2,14 +2,11 @@ import datetime
 import mysql.connector as mysql
 import pandas as pd
 import requests
-def query_df(qry):
-    devDB  = {
-        'host' :"185.180.163.10",
-        'user' : "dima_statist",
-        'passwd' : "YandexGoogle",
-        'database' : "workface.ru"
-    }
 
+# Тестовый бот телеграм для уведомлений
+
+def query_df(qry, token):
+    devDB  = token
     cnx = mysql.connect(**devDB)
     cursor = cnx.cursor()
     cursor.execute(qry)
@@ -17,8 +14,7 @@ def query_df(qry):
     field_names = [i[0] for i in cursor.description]
     cursor.close()
     cnx.close()
-    db_data_df = pd.DataFrame(resula,
-                           columns = field_names)
+    db_data_df = pd.DataFrame(resula, columns = field_names)
     return db_data_df
 def wf_reg_bot():
     r_dt = datetime.datetime.today()
